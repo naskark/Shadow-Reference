@@ -21,8 +21,12 @@ import { formatXml, validateXml, SAMPLE_XML } from "@/lib/tools/xml";
 import { hashText, generateHmac } from "@/lib/tools/crypto";
 import { curlToFetch, curlToAxios, parseUrl, SAMPLE_CURL } from "@/lib/tools/curl";
 import { generateUuid } from "@/lib/tools/uuid";
+import { renderMarkdown } from "@/lib/tools/markdown";
 import { MarkdownReaderTool } from "@/components/tools/MarkdownReaderTool";
 import { CodeCompareTool } from "@/components/tools/CodeCompareTool";
+import { FileUploadButton } from "@/components/FileUploadButton";
+import { FileDropZone } from "@/components/FileDropZone";
+import { TOOL_UPLOADS } from "@/lib/files";
 
 type Props = { tool: ToolDefinition };
 
@@ -48,53 +52,58 @@ export function ToolWorkspace({ tool }: Props) {
   const [colorPreview, setColorPreview] = useState("");
   const [markdownHtml, setMarkdownHtml] = useState("");
   const [qrDataUrl, setQrDataUrl] = useState("");
+  const [uploadedName, setUploadedName] = useState("");
+  const uploadConfig = TOOL_UPLOADS[tool.slug];
 
-  const run = useCallback(async () => {
+  const run = useCallback(async (override?: { input?: string; input2?: string; mode?: string }) => {
     setError("");
     setColorPreview("");
     setQrDataUrl("");
 
+    const source = override?.input ?? input;
+    const source2 = override?.input2 ?? input2;
+    const activeMode = override?.mode ?? mode;
     let result;
 
     switch (tool.kind) {
       case "transform":
-        if (tool.slug === "json-formatter") result = formatJson(input, indent);
-        else if (tool.slug === "json-validator") result = validateJson(input);
-        else if (tool.slug === "json-minifier") result = minifyJson(input);
-        else if (tool.slug === "json-to-typescript") result = jsonToTypeScript(input, rootName);
-        else if (tool.slug === "json-to-csv") result = jsonToCsv(input);
+        if (tool.slug === "json-formatter") result = formatJson(source, indent);
+        else if (tool.slug === "json-validator") result = validateJson(source);
+        else if (tool.slug === "json-minifier") result = minifyJson(source);
+        else if (tool.slug === "json-to-typescript") result = jsonToTypeScript(source, rootName);
+        else if (tool.slug === "json-to-csv") result = jsonToCsv(source);
         else result = { ok: false as const, error: "Unknown tool" };
         break;
 
       case "dual":
-        if (tool.slug === "json-yaml") result = mode === "yaml-to-json" ? yamlToJson(input) : jsonToYaml(input);
-        else if (tool.slug === "base64-encoder-decoder") result = mode === "decode" ? decodeBase64(input) : encodeBase64(input);
-        else if (tool.slug === "url-encoder-decoder") result = mode === "decode" ? decodeUrl(input, urlComponent) : encodeUrl(input, urlComponent);
-        else if (tool.slug === "html-entity-encoder-decoder") result = mode === "decode" ? decodeHtmlEntities(input) : encodeHtmlEntities(input);
-        else if (tool.slug === "regex-escape-unescape") result = mode === "unescape" ? unescapeRegex(input) : escapeRegex(input);
+        if (tool.slug === "json-yaml") result = activeMode === "yaml-to-json" ? yamlToJson(source) : jsonToYaml(source);
+        else if (tool.slug === "base64-encoder-decoder") result = activeMode === "decode" ? decodeBase64(source) : encodeBase64(source);
+        else if (tool.slug === "url-encoder-decoder") result = activeMode === "decode" ? decodeUrl(source, urlComponent) : encodeUrl(source, urlComponent);
+        else if (tool.slug === "html-entity-encoder-decoder") result = activeMode === "decode" ? decodeHtmlEntities(source) : encodeHtmlEntities(source);
+        else if (tool.slug === "regex-escape-unescape") result = activeMode === "unescape" ? unescapeRegex(source) : escapeRegex(source);
         else result = { ok: false as const, error: "Unknown tool" };
         break;
 
       case "jwt":
-        result = decodeJwt(input);
+        result = decodeJwt(source);
         break;
 
       case "regex":
-        result = testRegex(input, input2, flags);
+        result = testRegex(source, source2, flags);
         break;
 
       case "timestamp":
-        if (mode === "now") result = currentTimestamp(timestampUnit);
-        else if (mode === "to-unix") result = datetimeToUnix(input, timestampUnit);
-        else result = unixToDatetime(input, timestampUnit);
+        if (activeMode === "now") result = currentTimestamp(timestampUnit);
+        else if (activeMode === "to-unix") result = datetimeToUnix(source, timestampUnit);
+        else result = unixToDatetime(source, timestampUnit);
         break;
 
       case "datetime":
-        result = allDatetimeFormats(input);
+        result = allDatetimeFormats(source);
         break;
 
       case "url-parser":
-        result = parseUrl(input);
+        result = parseUrl(source);
         break;
 
       case "uuid":
@@ -102,46 +111,46 @@ export function ToolWorkspace({ tool }: Props) {
         break;
 
       case "color":
-        result = convertColor(input);
+        result = convertColor(source);
         if (result.ok && result.meta?.preview) setColorPreview(result.meta.preview);
         break;
 
       case "formatter":
-        if (tool.slug === "css-formatter") result = formatCss(input, formatterMinify);
-        else if (tool.slug === "html-formatter") result = formatHtml(input, formatterMinify);
-        else if (tool.slug === "javascript-formatter") result = formatJs(input, formatterMinify);
-        else if (tool.slug === "sql-formatter") result = formatSql(input);
+        if (tool.slug === "css-formatter") result = formatCss(source, formatterMinify);
+        else if (tool.slug === "html-formatter") result = formatHtml(source, formatterMinify);
+        else if (tool.slug === "javascript-formatter") result = formatJs(source, formatterMinify);
+        else if (tool.slug === "sql-formatter") result = formatSql(source);
         else result = { ok: false as const, error: "Unknown formatter" };
         break;
 
       case "csv-json":
-        result = csvJsonConvert(input, mode === "json-to-csv" ? "json-to-csv" : "csv-to-json", delimiter);
+        result = csvJsonConvert(source, activeMode === "json-to-csv" ? "json-to-csv" : "csv-to-json", delimiter);
         break;
 
       case "yaml":
-        result = mode === "format" ? formatYaml(input) : validateYaml(input);
+        result = activeMode === "format" ? formatYaml(source) : validateYaml(source);
         break;
 
       case "xml":
-        result = mode === "validate" ? validateXml(input) : formatXml(input);
+        result = activeMode === "validate" ? validateXml(source) : formatXml(source);
         break;
 
       case "crypto-hash":
-        result = await hashText(input, hashAlgo);
+        result = await hashText(source, hashAlgo);
         break;
 
       case "crypto-hmac":
-        result = await generateHmac(input, hmacSecret, hashAlgo);
+        result = await generateHmac(source, hmacSecret, hashAlgo);
         break;
 
       case "curl":
-        result = tool.slug === "curl-to-axios" ? curlToAxios(input) : curlToFetch(input);
+        result = tool.slug === "curl-to-axios" ? curlToAxios(source) : curlToFetch(source);
         break;
 
       case "qr":
         try {
           const QRCode = (await import("qrcode")).default;
-          const url = await QRCode.toDataURL(input, { width: 256, margin: 2 });
+          const url = await QRCode.toDataURL(source, { width: 256, margin: 2 });
           setQrDataUrl(url);
           result = { ok: true as const, output: "QR code generated. Download the image below." };
         } catch (e) {
@@ -160,6 +169,49 @@ export function ToolWorkspace({ tool }: Props) {
       setError(result.error);
     }
   }, [tool, input, input2, mode, indent, rootName, delimiter, flags, timestampUnit, urlComponent, formatterMinify, hashAlgo, hmacSecret, uuidCount]);
+
+  const applyUpload = useCallback(
+    (text: string, name: string) => {
+      const target = uploadConfig?.target ?? "input";
+      const lower = name.toLowerCase();
+      let nextMode = mode;
+
+      if (tool.slug === "json-yaml") {
+        nextMode = /\.ya?ml$/.test(lower) ? "yaml-to-json" : "json-to-yaml";
+        setMode(nextMode);
+      }
+      if (tool.slug === "csv-json") {
+        nextMode = lower.endsWith(".json") ? "json-to-csv" : "csv-to-json";
+        setMode(nextMode);
+      }
+
+      setError("");
+      setUploadedName(name);
+
+      if (target === "input2") {
+        setInput2(text);
+        void run({ input2: text });
+        return;
+      }
+
+      setInput(text);
+      if (tool.kind !== "markdown") {
+        void run({ input: text, mode: nextMode });
+      }
+    },
+    [mode, run, tool.kind, tool.slug, uploadConfig?.target],
+  );
+
+  const uploadControls = uploadConfig ? (
+    <FileUploadButton
+      config={uploadConfig}
+      onLoaded={applyUpload}
+      onError={(message) => {
+        setError(message);
+        setUploadedName("");
+      }}
+    />
+  ) : null;
 
   const loadSample = useCallback(() => {
     const samples: Record<string, string> = {
@@ -194,6 +246,7 @@ export function ToolWorkspace({ tool }: Props) {
       "qr-code-generator": "https://shadowreference.dev",
     };
     setInput(samples[tool.slug] ?? tool.sampleInput);
+    setUploadedName("");
     if (tool.kind === "regex") {
       setInput("\\w+");
       setInput2("The quick brown fox jumps over the lazy dog.");
@@ -221,10 +274,8 @@ export function ToolWorkspace({ tool }: Props) {
     let cancelled = false;
     (async () => {
       try {
-        const { marked } = await import("marked");
-        const DOMPurify = (await import("isomorphic-dompurify")).default;
-        const raw = await marked.parse(input || "");
-        if (!cancelled) setMarkdownHtml(DOMPurify.sanitize(typeof raw === "string" ? raw : ""));
+        const rendered = await renderMarkdown(input || "");
+        if (!cancelled) setMarkdownHtml(rendered);
       } catch {
         if (!cancelled) setMarkdownHtml("");
       }
@@ -329,16 +380,30 @@ export function ToolWorkspace({ tool }: Props) {
           onPrimary={() => {}}
           primaryLabel="Live Preview"
           onSample={loadSample}
-          onClear={() => { setInput(""); setMarkdownHtml(""); }}
+          onClear={() => { setInput(""); setMarkdownHtml(""); setUploadedName(""); }}
           output={input}
           downloadFilename="document.md"
+          extra={uploadControls}
         />
+        {uploadedName && (
+          <p className="font-mono text-xs text-[var(--accent)]">Loaded {uploadedName} locally</p>
+        )}
         <div className="grid gap-4 lg:grid-cols-2">
-          <Editor id="md-input" label="Markdown" value={input} onChange={setInput} rows={16} placeholder="Write Markdown here..." />
+          {uploadConfig ? (
+            <FileDropZone
+              config={uploadConfig}
+              onLoaded={applyUpload}
+              onError={(message) => { setError(message); setUploadedName(""); }}
+            >
+              <Editor id="md-input" label="Markdown" value={input} onChange={(value) => { setInput(value); setUploadedName(""); }} rows={16} placeholder="Write Markdown or drop a .md file..." />
+            </FileDropZone>
+          ) : (
+            <Editor id="md-input" label="Markdown" value={input} onChange={setInput} rows={16} placeholder="Write Markdown here..." />
+          )}
           <div>
             <p className="mb-1.5 text-sm font-medium">Preview</p>
             <div
-              className="markdown-preview min-h-[320px] rounded-lg border border-[var(--card-border)] bg-[var(--input-bg)] p-4 text-sm"
+              className="markdown-preview min-h-[320px] rounded-lg border border-[var(--card-border)] bg-[var(--input-bg)] p-4 text-base"
               dangerouslySetInnerHTML={{ __html: markdownHtml }}
             />
           </div>
@@ -464,18 +529,42 @@ export function ToolWorkspace({ tool }: Props) {
         onPrimary={() => void run()}
         primaryLabel={primaryLabel}
         onSample={loadSample}
-        onClear={() => { setInput(""); setInput2(""); setOutput(""); setError(""); setQrDataUrl(""); }}
+        onClear={() => { setInput(""); setInput2(""); setOutput(""); setError(""); setQrDataUrl(""); setUploadedName(""); }}
         onSwap={tool.kind === "dual" ? () => { setInput(output); setOutput(input); setError(""); } : undefined}
         output={output}
         downloadFilename={tool.downloadFilename}
         downloadMime={tool.downloadMime}
+        extra={uploadControls}
       />
+      {uploadedName && (
+        <p className="font-mono text-xs text-[var(--accent)]">Loaded {uploadedName} locally — nothing was uploaded to a server.</p>
+      )}
 
       <div className="grid gap-4 lg:grid-cols-2">
         {tool.kind === "regex" ? (
-          <Editor id="tool-input" label="Test Text" value={input2} onChange={setInput2} rows={12} />
+          uploadConfig ? (
+            <FileDropZone
+              config={uploadConfig}
+              onLoaded={applyUpload}
+              onError={(message) => { setError(message); setUploadedName(""); }}
+            >
+              <Editor id="tool-input" label="Test Text" value={input2} onChange={(value) => { setInput2(value); setUploadedName(""); }} rows={12} placeholder="Paste text or drop a file..." />
+            </FileDropZone>
+          ) : (
+            <Editor id="tool-input" label="Test Text" value={input2} onChange={setInput2} rows={12} />
+          )
         ) : tool.kind !== "uuid" ? (
-          <Editor id="tool-input" label="Input" value={input} onChange={setInput} rows={12} placeholder="Enter input..." />
+          uploadConfig ? (
+            <FileDropZone
+              config={uploadConfig}
+              onLoaded={applyUpload}
+              onError={(message) => { setError(message); setUploadedName(""); }}
+            >
+              <Editor id="tool-input" label="Input" value={input} onChange={(value) => { setInput(value); setUploadedName(""); }} rows={12} placeholder="Enter input or drop a file..." />
+            </FileDropZone>
+          ) : (
+            <Editor id="tool-input" label="Input" value={input} onChange={setInput} rows={12} placeholder="Enter input..." />
+          )
         ) : null}
 
         {tool.kind !== "qr" && (

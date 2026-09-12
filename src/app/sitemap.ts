@@ -1,16 +1,28 @@
 import type { MetadataRoute } from "next";
 import { TOOLS, SITE_URL } from "@/data/tools";
+import { POPULAR_TOOL_SLUGS } from "@/lib/seo";
 
 export const dynamic = "force-static";
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const staticPages = ["", "/tools", "/about", "/privacy", "/terms", "/contact"];
-  const toolPages = TOOLS.map((t) => `/tools/${t.slug}`);
+const LAST_MODIFIED = new Date("2026-09-12");
+const popular = new Set<string>(POPULAR_TOOL_SLUGS);
 
-  return [...staticPages, ...toolPages].map((path) => ({
-    url: `${SITE_URL}${path}`,
-    lastModified: new Date(),
-    changeFrequency: path.startsWith("/tools/") ? "monthly" : "weekly",
-    priority: path === "" ? 1 : path.startsWith("/tools/") ? 0.8 : 0.5,
+export default function sitemap(): MetadataRoute.Sitemap {
+  const staticPages: MetadataRoute.Sitemap = [
+    { url: SITE_URL, lastModified: LAST_MODIFIED, changeFrequency: "weekly", priority: 1 },
+    { url: `${SITE_URL}/tools`, lastModified: LAST_MODIFIED, changeFrequency: "weekly", priority: 0.9 },
+    { url: `${SITE_URL}/about`, lastModified: LAST_MODIFIED, changeFrequency: "monthly", priority: 0.4 },
+    { url: `${SITE_URL}/privacy`, lastModified: LAST_MODIFIED, changeFrequency: "yearly", priority: 0.2 },
+    { url: `${SITE_URL}/terms`, lastModified: LAST_MODIFIED, changeFrequency: "yearly", priority: 0.2 },
+    { url: `${SITE_URL}/contact`, lastModified: LAST_MODIFIED, changeFrequency: "yearly", priority: 0.3 },
+  ];
+
+  const toolPages: MetadataRoute.Sitemap = TOOLS.map((t) => ({
+    url: `${SITE_URL}/tools/${t.slug}`,
+    lastModified: LAST_MODIFIED,
+    changeFrequency: "monthly",
+    priority: popular.has(t.slug) ? 0.9 : 0.7,
   }));
+
+  return [...staticPages, ...toolPages];
 }

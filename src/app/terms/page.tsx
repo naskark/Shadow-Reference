@@ -1,8 +1,10 @@
-import { SITE_NAME } from "@/data/tools";
+import type { Metadata } from "next";
+import { SITE_NAME, SITE_URL } from "@/data/tools";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Terms of Service",
-  description: `Terms of service for ${SITE_NAME}.`,
+  description: `Terms of service for ${SITE_NAME} free online developer tools.`,
+  alternates: { canonical: `${SITE_URL}/terms` },
 };
 
 export default function TermsPage() {
@@ -21,6 +23,13 @@ export default function TermsPage() {
       <p>
         Tools are provided without warranty. Results may not be suitable for production use without independent verification.
         Cryptographic, formatting, and conversion tools are helpers — not replacements for audited libraries.
+      </p>
+
+      <h2>Advertising</h2>
+      <p>
+        {SITE_NAME} may display labeled third-party ads. Ads are not part of the tools, are not buttons, and
+        you are not required to interact with them. Do not click ads except when you genuinely want to visit
+        the advertiser.
       </p>
 
       <h2>Security</h2>

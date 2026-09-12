@@ -1,9 +1,12 @@
 import { ToolHeader } from "@/components/ToolHeader";
 import { ToolTutorial } from "@/components/ToolTutorial";
+import { ToolWorkbench } from "@/components/ToolWorkbench";
 import { FAQ } from "@/components/FAQ";
 import { RelatedTools } from "@/components/RelatedTools";
+import { AdSlot } from "@/components/AdSlot";
 import type { ToolDefinition } from "@/data/tools";
 import { getRelatedTools } from "@/data/tools";
+import { getToolSeo } from "@/lib/seo";
 
 export function ToolLayout({
   tool,
@@ -13,20 +16,28 @@ export function ToolLayout({
   children: React.ReactNode;
 }) {
   const related = getRelatedTools(tool.slug);
+  const seo = getToolSeo(tool);
 
   return (
-    <article className="mx-auto max-w-6xl px-4 py-8 sm:py-10">
+    <article className="mx-auto max-w-6xl px-4 py-6 sm:py-8">
       <ToolHeader tool={tool} />
-      <ToolTutorial tool={tool} />
 
-      <section className="glass-panel mb-12 rounded-2xl p-5 sm:p-7">
-        {children}
-      </section>
+      <ToolWorkbench toolName={tool.name}>{children}</ToolWorkbench>
+      <ToolTutorial tool={tool} />
 
       <div className="prose-tool space-y-10">
         <section className="glass-panel rounded-2xl p-6 sm:p-8">
-          <h2>What This Tool Does</h2>
-          <p>{tool.description}</p>
+          <h2>Free online {tool.name.toLowerCase()}</h2>
+          <p>{seo.intro}</p>
+        </section>
+
+        <section className="glass-panel rounded-2xl p-6 sm:p-8">
+          <h2>How to use {tool.name}</h2>
+          <ol>
+            {tool.howToUse.map((step) => (
+              <li key={step}>{step}</li>
+            ))}
+          </ol>
         </section>
 
         <section className="glass-panel rounded-2xl p-6 sm:p-8">
@@ -53,12 +64,16 @@ export function ToolLayout({
         </section>
 
         <div className="glass-panel rounded-2xl p-6 sm:p-8">
-          <FAQ items={tool.faqs} />
+          <FAQ items={seo.faqs} />
         </div>
+
+        <AdSlot format="rectangle" />
 
         <div className="glass-panel rounded-2xl p-6 sm:p-8">
           <RelatedTools tools={related} />
         </div>
+
+        <AdSlot />
       </div>
     </article>
   );

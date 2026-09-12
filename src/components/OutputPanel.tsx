@@ -20,7 +20,7 @@ export function OutputPanel({
         readOnly
         rows={rows}
         spellCheck={false}
-        className="tool-textarea w-full resize-y rounded-xl px-4 py-3 text-sm leading-relaxed"
+        className="tool-textarea w-full resize-y rounded-xl px-4 py-3 text-base leading-relaxed"
         aria-readonly="true"
       />
     </div>

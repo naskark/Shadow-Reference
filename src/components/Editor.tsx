@@ -28,7 +28,7 @@ export function Editor({
         rows={rows}
         readOnly={readOnly}
         spellCheck={false}
-        className="tool-textarea w-full resize-y rounded-xl px-4 py-3 text-sm leading-relaxed"
+        className="tool-textarea w-full resize-y rounded-xl px-4 py-3 text-base leading-relaxed"
       />
     </div>
   );

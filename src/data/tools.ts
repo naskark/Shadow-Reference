@@ -419,11 +419,11 @@ export const TOOLS: ToolDefinition[] = [
     description: "Split editor and preview pane. Renders Markdown safely with sanitization.",
     tagline: "Write Markdown and preview rendered HTML.",
     kind: "markdown",
-    sampleInput: "# Hello\n\nThis is **bold** and `code`.\n\n- Item 1\n- Item 2",
+    sampleInput: "# Hello\n\nThis is **bold** and `inline`.\n\n```js\nconst n = 1;\nconsole.log(n);\n```\n\n| A | B |\n| --- | --- |\n| 1 | 2 |\n",
     exampleInput: "# Title\n\nParagraph.",
     exampleOutput: "Rendered HTML preview",
     howToUse: ["Write Markdown in the editor.", "Preview updates as you type.", "Copy Markdown source."],
-    limitations: ["GitHub-flavored extensions are limited.", "HTML in Markdown is sanitized."],
+    limitations: ["Mermaid, math, and GitHub-only extras such as alerts are not rendered.", "HTML in Markdown is sanitized."],
     faqs: [faq("Is XSS possible?", "Rendered HTML is sanitized with DOMPurify.")],
     relatedSlugs: ["markdown-reader", "html-formatter", "html-entity-encoder-decoder"],
   },
@@ -434,7 +434,7 @@ export const TOOLS: ToolDefinition[] = [
     description: "Open and read .md files locally with a live rendered preview. Supports drag-and-drop upload, paste, and source/preview views.",
     tagline: "Read and preview Markdown files in your browser.",
     kind: "markdown-reader",
-    sampleInput: "# README\n\nUpload or paste a `.md` file.",
+    sampleInput: "# Hello\n\nThis is **bold** and `inline`.\n\n```js\nconst n = 1;\nconsole.log(n);\n```\n\n| A | B |\n| --- | --- |\n| 1 | 2 |\n",
     exampleInput: "# Hello\n\n**Bold** text",
     exampleOutput: "Rendered HTML preview",
     howToUse: [
@@ -445,7 +445,7 @@ export const TOOLS: ToolDefinition[] = [
     limitations: [
       "Maximum file size is 2 MB.",
       "Files are read locally — never uploaded to a server.",
-      "GitHub-flavored Markdown extensions are limited.",
+      "Mermaid, math, and GitHub-only extras such as alerts are not rendered.",
     ],
     faqs: [
       faq("Which file types are supported?", ".md, .markdown, and .txt files."),

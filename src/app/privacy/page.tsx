@@ -1,8 +1,10 @@
-import { SITE_NAME } from "@/data/tools";
+import type { Metadata } from "next";
+import { SITE_NAME, SITE_URL } from "@/data/tools";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Privacy Policy",
-  description: `Privacy policy for ${SITE_NAME}.`,
+  description: `Privacy policy for ${SITE_NAME}. All developer tools process data locally in your browser — JSON, JWTs, and secrets are never uploaded.`,
+  alternates: { canonical: `${SITE_URL}/privacy` },
 };
 
 export default function PrivacyPage() {
@@ -30,9 +32,35 @@ export default function PrivacyPage() {
         No sensitive data is persisted.
       </p>
 
+      <h2>Advertising</h2>
+      <p>
+        The site may display labeled third-party advertisements from Google AdSense. Ads are placed away from
+        tool buttons and inputs. What you paste into a tool is not sent to Google or to us.
+      </p>
+      <p>
+        Google may use cookies or similar identifiers to serve and measure ads. See{" "}
+        <a
+          href="https://policies.google.com/technologies/ads"
+          className="text-[var(--accent)] hover:underline"
+          rel="noopener noreferrer"
+        >
+          Google&apos;s advertising policy
+        </a>{" "}
+        and how to{" "}
+        <a
+          href="https://adssettings.google.com/"
+          className="text-[var(--accent)] hover:underline"
+          rel="noopener noreferrer"
+        >
+          control ad personalization
+        </a>
+        . Ads stay off until a publisher ID is configured for this site.
+      </p>
+
       <h2>Third-Party Services</h2>
       <p>
-        V1 does not include third-party analytics or advertising. If added in the future, this policy will be updated accordingly.
+        We do not use analytics products that log tool input. When ads are enabled, Google AdSense loads from
+        Google&apos;s servers. That traffic is separate from tool processing, which stays in your browser.
       </p>
 
       <h2>Contact</h2>

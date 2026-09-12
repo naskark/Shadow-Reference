@@ -1,19 +1,30 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ToolSearch } from "@/components/ToolSearch";
-import { TOOLS, SITE_NAME, SITE_TAGLINE, CATEGORIES } from "@/data/tools";
+import { Logo } from "@/components/Logo";
+import { AdSlot } from "@/components/AdSlot";
+import { TOOLS, SITE_NAME, SITE_URL, CATEGORIES, getToolBySlug } from "@/data/tools";
+import { SITE_DESCRIPTION, POPULAR_TOOL_SLUGS, absoluteTitle } from "@/lib/seo";
 
 const FEATURED = TOOLS.slice(0, 6);
+const popularTools = POPULAR_TOOL_SLUGS.map((slug) => getToolBySlug(slug)).filter(Boolean) as typeof TOOLS;
+
+export const metadata: Metadata = {
+  title: { absolute: absoluteTitle("Free Online Developer Tools — JSON Formatter, JWT Decoder & More") },
+  description: SITE_DESCRIPTION,
+  alternates: { canonical: SITE_URL },
+};
 
 export default function HomePage() {
   return (
     <div className="mx-auto max-w-6xl px-4 pb-16 pt-8 sm:pt-12">
-      {/* Hero */}
       <section className="relative mb-16 overflow-hidden rounded-2xl border border-[var(--card-border)] glass-panel px-6 py-12 sm:px-10 sm:py-16">
         <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[var(--accent-glow)] blur-3xl" aria-hidden="true" />
         <div className="absolute -bottom-16 -left-16 h-48 w-48 rounded-full bg-[var(--orb-2)] blur-3xl" aria-hidden="true" />
 
         <div className="relative">
-          <div className="mb-5 flex flex-wrap items-center gap-2">
+          <div className="mb-5 flex flex-wrap items-center gap-3">
+            <Logo size={44} className="rounded-xl shadow-[0_0_24px_var(--accent-glow)]" />
             <span className="badge badge-accent">
               <span className="status-dot" />
               All systems local
@@ -24,8 +35,13 @@ export default function HomePage() {
 
           <h1 className="max-w-3xl text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
             <span className="gradient-text">{SITE_NAME}</span>
+            <span className="mt-3 block text-2xl font-semibold tracking-tight text-[var(--foreground)] sm:text-3xl lg:text-4xl">
+              Free online JSON formatter, JWT decoder &amp; developer tools
+            </span>
           </h1>
-          <p className="mt-4 max-w-2xl text-lg text-[var(--muted)] sm:text-xl">{SITE_TAGLINE}</p>
+          <p className="mt-4 max-w-2xl text-lg text-[var(--muted)] sm:text-xl">
+            Beautify JSON, decode tokens, encode Base64, test regex, generate UUIDs, and more — entirely in your browser.
+          </p>
           <p className="mt-3 max-w-xl font-mono text-sm text-[var(--muted)]">
             <span className="text-[var(--accent)]">$</span> no login · no uploads · no server calls
           </p>
@@ -41,14 +57,29 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Search */}
+      <section className="mb-16">
+        <p className="section-label mb-2">Popular searches</p>
+        <h2 className="section-title mb-6">Jump to a tool</h2>
+        <ul className="flex flex-wrap gap-2">
+          {popularTools.map((tool) => (
+            <li key={tool.slug}>
+              <Link
+                href={`/tools/${tool.slug}`}
+                className="group inline-flex rounded-full border border-[var(--card-border)] bg-[var(--card)] px-4 py-2 text-sm backdrop-blur transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+              >
+                {tool.name}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
+
       <section className="mb-16">
         <p className="section-label mb-2">Search</p>
         <h2 className="section-title mb-6">Find the right tool</h2>
         <ToolSearch />
       </section>
 
-      {/* Categories */}
       <section className="mb-16">
         <p className="section-label mb-2">Browse</p>
         <h2 className="section-title mb-6">Categories</h2>
@@ -71,7 +102,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Featured */}
       <section>
         <div className="mb-6 flex items-end justify-between">
           <div>
@@ -99,6 +129,8 @@ export default function HomePage() {
           ))}
         </div>
       </section>
+
+      <AdSlot />
     </div>
   );
 }

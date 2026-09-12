@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "@/components/ThemeProvider";
+import { Logo } from "@/components/Logo";
 import { SITE_NAME } from "@/data/tools";
 
 export function Header() {
@@ -15,12 +16,13 @@ export function Header() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[var(--card-border)] bg-[var(--card)]/80 backdrop-blur-xl">
+    <header className="site-header sticky top-0 z-50 border-b border-[var(--card-border)] backdrop-blur-xl">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3.5">
         <Link href="/" className="group flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--card-border)] bg-[var(--code-bg)] font-mono text-sm font-bold text-[var(--accent)] shadow-[0_0_20px_var(--accent-glow)] transition group-hover:border-[var(--accent)]">
-            SR
-          </div>
+          <Logo
+            size={36}
+            className="shrink-0 rounded-lg shadow-[0_0_20px_var(--accent-glow)] transition group-hover:shadow-[0_0_28px_var(--accent-glow)]"
+          />
           <div className="flex flex-col">
             <span className="text-base font-semibold tracking-tight">{SITE_NAME}</span>
             <span className="hidden font-mono text-[10px] uppercase tracking-widest text-[var(--muted)] sm:block">

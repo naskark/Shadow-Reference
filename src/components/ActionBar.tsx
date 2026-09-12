@@ -34,6 +34,7 @@ export function ActionBar({
           Sample Input
         </button>
       )}
+      {extra}
       {onClear && (
         <button type="button" onClick={onClear} className="btn-secondary text-sm">
           Clear
@@ -48,7 +49,6 @@ export function ActionBar({
       {output && downloadFilename && (
         <DownloadButton text={output} filename={downloadFilename} mime={downloadMime} />
       )}
-      {extra}
     </div>
   );
 }

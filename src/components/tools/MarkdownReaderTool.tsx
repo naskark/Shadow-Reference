@@ -1,17 +1,20 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { CopyButton } from "@/components/CopyButton";
 import { DownloadButton } from "@/components/DownloadButton";
+import { FileDropZone } from "@/components/FileDropZone";
+import { FileUploadButton } from "@/components/FileUploadButton";
 import {
   getMarkdownStats,
   renderMarkdown,
-  isMarkdownFilename,
-  MAX_MD_FILE_BYTES,
   SAMPLE_MD,
 } from "@/lib/tools/markdown";
+import { TOOL_UPLOADS } from "@/lib/files";
 
 type ViewMode = "split" | "preview" | "source";
+
+const uploadConfig = TOOL_UPLOADS["markdown-reader"]!;
 
 export function MarkdownReaderTool() {
   const [content, setContent] = useState("");
@@ -19,8 +22,6 @@ export function MarkdownReaderTool() {
   const [html, setHtml] = useState("");
   const [error, setError] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("split");
-  const [dragOver, setDragOver] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const stats = getMarkdownStats(content);
 
@@ -37,73 +38,30 @@ export function MarkdownReaderTool() {
     return () => { cancelled = true; };
   }, [content]);
 
-  const loadFile = useCallback((file: File) => {
+  const onLoaded = useCallback((text: string, name: string) => {
     setError("");
-    if (!isMarkdownFilename(file.name)) {
-      setError("Please upload a .md, .markdown, or .txt file.");
-      return;
-    }
-    if (file.size > MAX_MD_FILE_BYTES) {
-      setError("File is too large. Maximum size is 2 MB.");
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = () => {
-      setContent(String(reader.result ?? ""));
-      setFilename(file.name);
-    };
-    reader.onerror = () => setError("Failed to read file.");
-    reader.readAsText(file);
+    setContent(text);
+    setFilename(name);
   }, []);
-
-  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) loadFile(file);
-    e.target.value = "";
-  };
-
-  const onDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setDragOver(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file) loadFile(file);
-  };
 
   return (
     <div className="space-y-4">
-      <div
-        onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-        onDragLeave={() => setDragOver(false)}
-        onDrop={onDrop}
-        className={`rounded-xl border-2 border-dashed px-6 py-8 text-center transition ${
-          dragOver ? "border-[var(--accent)] bg-[var(--accent-glow)]" : "border-[var(--card-border)]"
-        }`}
-      >
-        <p className="font-mono text-sm text-[var(--muted)]">
-          Drop a <span className="text-[var(--accent)]">.md</span> file here or
-        </p>
-        <button
-          type="button"
-          onClick={() => fileInputRef.current?.click()}
-          className="btn-primary mt-3 text-sm"
-        >
-          Choose File
-        </button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".md,.markdown,.txt,text/markdown,text/plain"
-          onChange={onFileChange}
-          className="hidden"
-          aria-label="Upload markdown file"
-        />
-        {filename && (
-          <p className="mt-3 font-mono text-xs text-[var(--accent)]">{filename}</p>
-        )}
-      </div>
+      <FileDropZone config={uploadConfig} onLoaded={onLoaded} onError={setError}>
+        <div className="rounded-xl border-2 border-dashed border-[var(--card-border)] px-6 py-6 text-center">
+          <p className="font-mono text-sm text-[var(--muted)]">
+            Drop a <span className="text-[var(--accent)]">.md</span> file here or
+          </p>
+          <div className="mt-3 flex justify-center">
+            <FileUploadButton config={{ ...uploadConfig, label: "Choose File" }} onLoaded={onLoaded} onError={setError} />
+          </div>
+          {filename && (
+            <p className="mt-3 font-mono text-xs text-[var(--accent)]">{filename} loaded locally</p>
+          )}
+        </div>
+      </FileDropZone>
 
       <div className="flex flex-wrap items-center gap-2">
-        <button type="button" onClick={() => setContent(SAMPLE_MD)} className="btn-secondary text-sm">
+        <button type="button" onClick={() => { setContent(SAMPLE_MD); setFilename(""); }} className="btn-secondary text-sm">
           Sample .md
         </button>
         <button type="button" onClick={() => { setContent(""); setFilename(""); setError(""); }} className="btn-secondary text-sm">
@@ -150,7 +108,7 @@ export function MarkdownReaderTool() {
               rows={18}
               spellCheck={false}
               placeholder="Paste markdown or upload a .md file..."
-              className="tool-textarea w-full resize-y rounded-xl px-4 py-3 text-sm leading-relaxed"
+              className="tool-textarea w-full resize-y rounded-xl px-4 py-3 text-base leading-relaxed"
             />
           </div>
         )}
@@ -158,7 +116,7 @@ export function MarkdownReaderTool() {
           <div>
             <p className="mb-1.5 text-sm font-medium">Rendered Preview</p>
             <div
-              className="markdown-preview min-h-[360px] rounded-xl border border-[var(--card-border)] bg-[var(--input-bg)] p-5 text-sm"
+              className="markdown-preview min-h-[360px] rounded-xl border border-[var(--card-border)] bg-[var(--input-bg)] p-5 text-base"
               dangerouslySetInnerHTML={{ __html: html || "<p class='text-[var(--muted)]'>Nothing to preview yet.</p>" }}
             />
           </div>

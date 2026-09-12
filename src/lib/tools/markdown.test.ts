@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getMarkdownStats, isMarkdownFilename } from "@/lib/tools/markdown";
+import { getMarkdownStats, isMarkdownFilename, renderMarkdown } from "@/lib/tools/markdown";
 
 describe("markdown reader", () => {
   it("calculates stats", () => {
@@ -14,5 +14,15 @@ describe("markdown reader", () => {
     expect(isMarkdownFilename("notes.markdown")).toBe(true);
     expect(isMarkdownFilename("file.txt")).toBe(true);
     expect(isMarkdownFilename("image.png")).toBe(false);
+  });
+
+  it("highlights fenced javascript and keeps gfm tables", async () => {
+    const html = await renderMarkdown(
+      '```js\nconst n = 1;\n```\n\n| A | B |\n| --- | --- |\n| 1 | 2 |\n',
+    );
+    expect(html).toContain("hljs");
+    expect(html).toContain("hljs-keyword");
+    expect(html).toContain("<table>");
+    expect(html).not.toContain("<script>");
   });
 });

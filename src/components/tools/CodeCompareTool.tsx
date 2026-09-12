@@ -3,6 +3,8 @@
 import { useMemo, useState } from "react";
 import { CopyButton } from "@/components/CopyButton";
 import { DownloadButton } from "@/components/DownloadButton";
+import { FileDropZone } from "@/components/FileDropZone";
+import { FileUploadButton } from "@/components/FileUploadButton";
 import {
   compareLines,
   formatUnifiedDiff,
@@ -10,12 +12,13 @@ import {
   SAMPLE_MODIFIED,
   type DiffLine,
 } from "@/lib/tools/diff";
+import { CODE_COMPARE_UPLOAD } from "@/lib/files";
 
 type ViewMode = "side-by-side" | "unified";
 
 function DiffSideBySide({ lines }: { lines: DiffLine[] }) {
   return (
-    <div className="overflow-x-auto rounded-xl border border-[var(--card-border)] font-mono text-xs">
+    <div className="overflow-x-auto rounded-xl border border-[var(--card-border)] font-mono text-sm">
       <div className="grid grid-cols-2 border-b border-[var(--card-border)] bg-[var(--code-bg)]">
         <div className="px-3 py-2 font-medium text-[var(--error)]">Original</div>
         <div className="border-l border-[var(--card-border)] px-3 py-2 font-medium text-[var(--success)]">Modified</div>
@@ -46,7 +49,7 @@ function DiffSideBySide({ lines }: { lines: DiffLine[] }) {
 
 function DiffUnified({ lines }: { lines: DiffLine[] }) {
   return (
-    <div className="overflow-x-auto rounded-xl border border-[var(--card-border)] font-mono text-xs">
+    <div className="overflow-x-auto rounded-xl border border-[var(--card-border)] font-mono text-sm">
       {lines.map((line, i) => (
         <div key={i} className={`diff-line diff-line-${line.type} flex px-2 py-0.5`}>
           <span className="diff-lnum w-10 shrink-0 text-right">
@@ -67,6 +70,9 @@ export function CodeCompareTool() {
   const [modified, setModified] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("side-by-side");
   const [ignoreWhitespace, setIgnoreWhitespace] = useState(false);
+  const [originalName, setOriginalName] = useState("");
+  const [modifiedName, setModifiedName] = useState("");
+  const [uploadError, setUploadError] = useState("");
 
   const diff = useMemo(() => {
     const a = ignoreWhitespace ? original.split("\n").map((l) => l.trim()).join("\n") : original;
@@ -82,14 +88,14 @@ export function CodeCompareTool() {
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
-          onClick={() => { setOriginal(SAMPLE_ORIGINAL); setModified(SAMPLE_MODIFIED); }}
+          onClick={() => { setOriginal(SAMPLE_ORIGINAL); setModified(SAMPLE_MODIFIED); setOriginalName(""); setModifiedName(""); setUploadError(""); }}
           className="btn-secondary text-sm"
         >
           Load Sample
         </button>
         <button
           type="button"
-          onClick={() => { setOriginal(""); setModified(""); }}
+          onClick={() => { setOriginal(""); setModified(""); setOriginalName(""); setModifiedName(""); setUploadError(""); }}
           className="btn-secondary text-sm"
         >
           Clear
@@ -129,31 +135,57 @@ export function CodeCompareTool() {
         </div>
       </div>
 
+      {uploadError && (
+        <p role="alert" className="text-sm text-[var(--error)]">{uploadError}</p>
+      )}
+
       <div className="grid gap-4 lg:grid-cols-2">
-        <div>
-          <label htmlFor="code-original" className="mb-1.5 block text-sm font-medium">Original</label>
+        <FileDropZone
+          config={CODE_COMPARE_UPLOAD}
+          onLoaded={(text, name) => { setOriginal(text); setOriginalName(name); setUploadError(""); }}
+          onError={setUploadError}
+        >
+          <div className="mb-1.5 flex items-center justify-between gap-2">
+            <label htmlFor="code-original" className="text-sm font-medium">Original {originalName && <span className="font-mono text-xs text-[var(--accent)]">({originalName})</span>}</label>
+            <FileUploadButton
+              config={{ ...CODE_COMPARE_UPLOAD, label: "Upload original" }}
+              onLoaded={(text, name) => { setOriginal(text); setOriginalName(name); setUploadError(""); }}
+              onError={setUploadError}
+            />
+          </div>
           <textarea
             id="code-original"
             value={original}
-            onChange={(e) => setOriginal(e.target.value)}
+            onChange={(e) => { setOriginal(e.target.value); setOriginalName(""); }}
             rows={14}
             spellCheck={false}
-            placeholder="Paste original code..."
-            className="tool-textarea w-full resize-y rounded-xl px-4 py-3 text-sm leading-relaxed"
+            placeholder="Paste original code or drop a file..."
+            className="tool-textarea w-full resize-y rounded-xl px-4 py-3 text-base leading-relaxed"
           />
-        </div>
-        <div>
-          <label htmlFor="code-modified" className="mb-1.5 block text-sm font-medium">Modified</label>
+        </FileDropZone>
+        <FileDropZone
+          config={CODE_COMPARE_UPLOAD}
+          onLoaded={(text, name) => { setModified(text); setModifiedName(name); setUploadError(""); }}
+          onError={setUploadError}
+        >
+          <div className="mb-1.5 flex items-center justify-between gap-2">
+            <label htmlFor="code-modified" className="text-sm font-medium">Modified {modifiedName && <span className="font-mono text-xs text-[var(--accent)]">({modifiedName})</span>}</label>
+            <FileUploadButton
+              config={{ ...CODE_COMPARE_UPLOAD, label: "Upload modified" }}
+              onLoaded={(text, name) => { setModified(text); setModifiedName(name); setUploadError(""); }}
+              onError={setUploadError}
+            />
+          </div>
           <textarea
             id="code-modified"
             value={modified}
-            onChange={(e) => setModified(e.target.value)}
+            onChange={(e) => { setModified(e.target.value); setModifiedName(""); }}
             rows={14}
             spellCheck={false}
-            placeholder="Paste modified code..."
-            className="tool-textarea w-full resize-y rounded-xl px-4 py-3 text-sm leading-relaxed"
+            placeholder="Paste modified code or drop a file..."
+            className="tool-textarea w-full resize-y rounded-xl px-4 py-3 text-base leading-relaxed"
           />
-        </div>
+        </FileDropZone>
       </div>
 
       {hasDiff && (

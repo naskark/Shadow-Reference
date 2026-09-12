@@ -1,8 +1,10 @@
-import { SITE_NAME } from "@/data/tools";
+import type { Metadata } from "next";
+import { SITE_NAME, SITE_URL } from "@/data/tools";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Contact",
-  description: `Contact ${SITE_NAME}.`,
+  description: `Contact ${SITE_NAME} about bugs, feedback, or new developer tools like JSON formatter and JWT decoder.`,
+  alternates: { canonical: `${SITE_URL}/contact` },
 };
 
 export default function ContactPage() {
