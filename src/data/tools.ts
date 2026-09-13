@@ -599,7 +599,7 @@ export const TOOLS: ToolDefinition[] = [
     description: "Generate QR codes for text and URLs entirely in the browser.",
     tagline: "Create QR codes locally.",
     kind: "qr",
-    sampleInput: "https://shadowreference.dev",
+    sampleInput: "https://www.shadowreference.com",
     exampleInput: "Hello World",
     exampleOutput: "QR code image",
     howToUse: ["Enter text or URL.", "Click Generate.", "Download PNG."],
@@ -625,4 +625,4 @@ export function getRelatedTools(slug: string): ToolDefinition[] {
 
 export const SITE_NAME = "ShadowReference";
 export const SITE_TAGLINE = "The developer reference desk for everyday problems.";
-export const SITE_URL = "https://shadowreference.dev";
+export const SITE_URL = "https://www.shadowreference.com";

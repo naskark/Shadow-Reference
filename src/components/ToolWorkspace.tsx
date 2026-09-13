@@ -243,7 +243,7 @@ export function ToolWorkspace({ tool }: Props) {
       "hmac-generator": "message",
       "curl-to-fetch": SAMPLE_CURL,
       "curl-to-axios": SAMPLE_CURL,
-      "qr-code-generator": "https://shadowreference.dev",
+      "qr-code-generator": "https://www.shadowreference.com",
     };
     setInput(samples[tool.slug] ?? tool.sampleInput);
     setUploadedName("");

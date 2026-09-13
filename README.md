@@ -2,7 +2,7 @@
 
 Free, privacy-first developer tools that run in the browser.
 
-Site: [https://shadowreference.dev](https://shadowreference.dev)
+Site: [https://www.shadowreference.com](https://www.shadowreference.com)
 
 **Full product + engineering spec:** [dev2.md](./dev2.md) — upload that one file to an AI to continue work.
 
@@ -54,16 +54,16 @@ Leave AdSense vars empty until you have a real `ca-pub-` id. If you add them lat
 
 ### 2. Attach your domain
 
-The site canonical URL is already `https://shadowreference.dev`. If that zone is in the same Cloudflare account:
+The site canonical URL is `https://www.shadowreference.com`. If that zone is in the same Cloudflare account:
 
 1. Open the Pages project → **Custom domains** → **Set up a custom domain**.
-2. Add `shadowreference.dev`.
-3. Add `www.shadowreference.dev` if you want www as well.
+2. Add `www.shadowreference.com`.
+3. Add `shadowreference.com` (apex) as well.
 4. Cloudflare will create the DNS records in that zone (apex uses CNAME flattening). Wait for SSL to become **Active**.
 
 If the domain currently points at another host, replace those records with the ones Pages shows. Do not keep an old A record to a previous server.
 
-Optional: in **Rules** → **Redirects**, send `www` → `https://shadowreference.dev` (301) so you have one canonical host.
+Optional: in **Rules** → **Redirects**, send `shadowreference.com` → `https://www.shadowreference.com` (301) so you have one canonical host.
 
 ### 3. After it is live
 

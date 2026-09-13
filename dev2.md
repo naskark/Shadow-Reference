@@ -32,7 +32,7 @@ This is the **only** product + engineering document. Upload this one file to an 
 
 **ShadowReference** is a free, privacy-first developer toolkit that runs entirely in the browser.
 
-- Live site: `https://shadowreference.dev`
+- Live site: `https://www.shadowreference.com`
 - GitHub: `https://github.com/naskark/Shadow-Reference` (default branch `main`)
 - Contact: `hello@shadowreference.dev`
 - Name: ShadowReference
@@ -156,7 +156,7 @@ Ads stay hidden until the client matches `/^ca-pub-\d{10,20}$/`. Same vars must 
 | `/robots.txt` | `src/app/robots.ts` | Allow all, including GPTBot |
 | 404 | `src/app/not-found.tsx` | Custom not found |
 
-Canonical origin: `SITE_URL` = `https://shadowreference.dev` in `src/data/tools.ts`.
+Canonical origin: `SITE_URL` = `https://www.shadowreference.com` in `src/data/tools.ts`.
 
 Layout (`src/app/layout.tsx`): Geist fonts, dark class on `<html>` by default, `JsonLd` site graph, `AdSenseScript` (no-ops if ads off), `BackgroundEffects`, `ThemeProvider`, `Header`, `Footer`.
 
@@ -456,7 +456,7 @@ Cannot promise rank #1 vs jsonformatter.org. We ship honest, unique pages and in
 Per tool (`buildToolMetadata` / `buildToolJsonLd`):
 
 - Unique `<title>` and meta description
-- Canonical `https://shadowreference.dev/tools/{slug}`
+- Canonical `https://www.shadowreference.com/tools/{slug}`
 - Keywords from `searchTerms`
 - Open Graph + Twitter summary
 - JSON-LD `@graph`: WebApplication, WebPage, BreadcrumbList, HowTo, FAQPage
@@ -503,7 +503,7 @@ Slots and script exist. **Nothing renders** until `NEXT_PUBLIC_ADSENSE_CLIENT` i
 
 ### Enable
 
-1. Apply at https://www.google.com/adsense/ for `https://shadowreference.dev`
+1. Apply at https://www.google.com/adsense/ for `https://www.shadowreference.com`
 2. Create **manual display units** — never Auto ads
 3. `cp .env.example .env.local` and fill IDs
 4. Set the same `NEXT_PUBLIC_*` vars on the host **build**
@@ -589,7 +589,7 @@ Copy these into any implementation prompt:
 - Lottie and QR are lazy so the main bundle stays smaller
 - Vitest is **node**, not jsdom, for most tests — keep tool tests free of DOM unless you change config
 - Optional dep `@tailwindcss/oxide-darwin-arm64` is for local Mac ARM
-- Repo folder is `shadowreferenc` (typo) but product/domain is ShadowReference / shadowreference.dev
+- Repo folder is `shadowreferenc` (typo) but product/domain is ShadowReference / www.shadowreference.com
 
 ---
 
