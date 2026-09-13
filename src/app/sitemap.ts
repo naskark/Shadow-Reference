@@ -4,7 +4,7 @@ import { POPULAR_TOOL_SLUGS } from "@/lib/seo";
 
 export const dynamic = "force-static";
 
-const LAST_MODIFIED = new Date("2026-09-12");
+const LAST_MODIFIED = new Date("2026-09-13");
 const popular = new Set<string>(POPULAR_TOOL_SLUGS);
 
 export default function sitemap(): MetadataRoute.Sitemap {
